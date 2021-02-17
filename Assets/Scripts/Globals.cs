@@ -4,6 +4,13 @@ using UnityEngine;
 
 public static class Globals
 {
+    public static class Animation
+    {
+        public static readonly string Flash = "Flash";
+        public static readonly string IsJumping = "isJumping";
+        public static readonly string MoveX = "moveX";
+    }
+
     public static class Input
     {
         public static readonly string Attack = "Attack";
@@ -14,5 +21,10 @@ public static class Globals
         public static readonly string Horizontal = "Horizontal";
         public static readonly string Vertical = "Vertical";
 
+    }
+
+    public static class Tags
+    {
+        public static readonly string Player = "Player";
     }
 }

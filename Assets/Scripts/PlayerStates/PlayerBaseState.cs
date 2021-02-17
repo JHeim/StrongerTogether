@@ -2,6 +2,8 @@ using UnityEngine;
 
 public abstract class PlayerBaseState
 {
+    public abstract PlayerStateManager playerStateManager { get; set; }
+
     public abstract void EnterState(PlayerController player);
 
     public abstract void OnCollisionEnter2D(PlayerController player, Collision2D collision);

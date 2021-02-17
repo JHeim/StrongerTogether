@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class PlayerGlideState : PlayerBaseState
 {
+
+    public override PlayerStateManager playerStateManager { get; set; }
+
     public override void EnterState(PlayerController player)
     {
 

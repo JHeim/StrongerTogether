@@ -7,11 +7,17 @@ public class PlayerSpringState : PlayerBaseState
     public bool jumpKeyHeld;
     public bool isJumping;
 
+    public Vector3 expressionPosition = Vector3.zero;
+
+    public override PlayerStateManager playerStateManager { get; set; }
 
     public override void EnterState(PlayerController player)
     {
+        player.playerExpression.transform.position = player.transform.position + expressionPosition;
         player.rb.sharedMaterial = null;
-        player.springPlayer.SetActive(true);
+        //player.springPlayer.SetActive(true);
+
+        player.currentRenderer = player.springPlayer.GetComponent<SpriteRenderer>();
     }
 
     public override void FixedUpdate(PlayerController player)
@@ -28,8 +34,8 @@ public class PlayerSpringState : PlayerBaseState
             if (!jumpKeyHeld && Vector2.Dot(player.rb.velocity, Vector2.up) > 0)
             {
                 player.rb.AddForce(player.counterJumpForce * player.rb.mass);
+                playerStateManager.animator.SetBool(Globals.Animation.IsJumping, true);
             }
-            //player.rb.AddForce(new Vector2(player.inputMovement * player.springSpeed, 0));
 
         }
 
@@ -39,6 +45,7 @@ public class PlayerSpringState : PlayerBaseState
     {
         isJumping = false;
         player.isGrounded = true;
+        playerStateManager.animator.SetBool(Globals.Animation.IsJumping, false);
     }
 
     // Check if colliding with anything to determine if in air.
@@ -46,9 +53,11 @@ public class PlayerSpringState : PlayerBaseState
     {
         if (Input.GetButtonDown(Globals.Input.Goop))
         {
-            player.springPlayer.SetActive(false);
+            //player.springPlayer.SetActive(false);
             player.TransitionToState(player.goopState);
         }
+
+        playerStateManager.animator.SetFloat(Globals.Animation.MoveX, player.inputMovement);
 
         JumpCheck(player);
     }
@@ -58,9 +67,11 @@ public class PlayerSpringState : PlayerBaseState
         if (Input.GetButtonDown(Globals.Input.Jump))
         {
             jumpKeyHeld = true;
-            //if (player.isGrounded)
+            if (player.isGrounded)
             {
+                player.PlaySound(player.jumpSound);
                 isJumping = true;
+                playerStateManager.animator.SetBool(Globals.Animation.IsJumping, true);
                 player.rb.AddForce(Vector2.up * player.jumpForce * player.rb.mass, ForceMode2D.Impulse);
                 //player.rb.AddForce(Vector2.up * player.jumpForce);
             }
