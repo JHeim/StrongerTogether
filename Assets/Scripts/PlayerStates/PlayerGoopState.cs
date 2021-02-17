@@ -43,6 +43,11 @@ public class PlayerGoopState : PlayerBaseState
             player.springState.JumpCheck(player);
         }
 
+        if (Input.GetButtonDown(Globals.Input.Attack))
+        {
+            player.TransitionToState(player.bulbState);
+        }
+
         if (Input.GetButtonDown(Globals.Input.Glide) && player.inAir)
         {
             //player.goopPlayer.SetActive(false);

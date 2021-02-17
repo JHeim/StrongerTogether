@@ -31,6 +31,9 @@ public class PlayerController : MonoBehaviour
     public Animator changeCharacterAnimator;
     public ChangeCharacterFlash changeCharacterFlasher;
 
+    [Header("Bulb Player Settings")]
+    public GameObject bulbPlayer;
+
     [Header("Glide Player Settings")]
     //public GameObject glidePlayer;
     public AudioClip glideTransformSound;
@@ -49,6 +52,7 @@ public class PlayerController : MonoBehaviour
     public AudioClip springTransformSound;
     public AudioClip jumpSound;
 
+    public readonly PlayerBulbState bulbState = new PlayerBulbState();
     public readonly PlayerGlideState glideState = new PlayerGlideState();
     public readonly PlayerGoopState goopState = new PlayerGoopState();
     public readonly PlayerSpringState springState = new PlayerSpringState();
@@ -75,7 +79,7 @@ public class PlayerController : MonoBehaviour
         //glideState.playerStateManager = glidePlayer.GetComponent<PlayerStateManager>();
         goopState.playerStateManager = goopPlayer.GetComponent<PlayerStateManager>();
         springState.playerStateManager = springPlayer.GetComponent<PlayerStateManager>();
-
+        bulbState.playerStateManager = bulbPlayer.GetComponent<PlayerStateManager>();
         
     }
 

@@ -57,6 +57,11 @@ public class PlayerSpringState : PlayerBaseState
             player.TransitionToState(player.goopState);
         }
 
+        if (Input.GetButtonDown(Globals.Input.Attack))
+        {
+            player.TransitionToState(player.bulbState);
+        }
+
         playerStateManager.animator.SetFloat(Globals.Animation.MoveX, player.inputMovement);
 
         JumpCheck(player);
