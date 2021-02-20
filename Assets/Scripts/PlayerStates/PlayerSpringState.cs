@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerSpringState : PlayerBaseState
 {
+    public override int stackIndex { get; set; } = 0;
+
     public bool jumpKeyHeld;
     public bool isJumping;
 
@@ -62,6 +64,11 @@ public class PlayerSpringState : PlayerBaseState
             player.TransitionToState(player.bulbState);
         }
 
+        if (Input.GetButtonDown(Globals.Input.Glide))
+        {
+            player.TransitionToState(player.glideState);
+        }
+
         playerStateManager.animator.SetFloat(Globals.Animation.MoveX, player.inputMovement);
 
         JumpCheck(player);
@@ -85,5 +92,15 @@ public class PlayerSpringState : PlayerBaseState
         {
             jumpKeyHeld = false;
         }
+    }
+
+    public override void OnDestroy(PlayerController player)
+    {
+        
+    }
+
+    public override void Start(PlayerController player)
+    {
+        
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerGoopState : PlayerBaseState
 {
-
+    public override int stackIndex { get; set; } = 1;
     public override PlayerStateManager playerStateManager { get; set; }
 
     public Vector3 expressionPosition = new Vector3(0.07f, -0.3f, 0f);
@@ -53,5 +53,15 @@ public class PlayerGoopState : PlayerBaseState
             //player.goopPlayer.SetActive(false);
             player.TransitionToState(player.glideState);
         }
+    }
+
+    public override void OnDestroy(PlayerController player)
+    {
+
+    }
+
+    public override void Start(PlayerController player)
+    {
+
     }
 }

@@ -7,6 +7,7 @@ public static class Globals
     public static class Animation
     {
         public static readonly string Flash = "Flash";
+        public static readonly string IsAttacking = "isAttacking";
         public static readonly string IsJumping = "isJumping";
         public static readonly string MoveX = "moveX";
     }

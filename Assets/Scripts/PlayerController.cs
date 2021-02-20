@@ -6,6 +6,26 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
+    public PlayerBaseState[] characterStack  = new PlayerBaseState[4];
+
+    public void StackCharacter(PlayerBaseState character)
+    {
+        if (character.stackIndex > 0)
+        {
+            for (int i = character.stackIndex; i > 0; i--)
+            {
+                characterStack[i] = characterStack[i - 1];
+                characterStack[i].stackIndex = i;
+            }
+            character.stackIndex = 0;
+            characterStack[0] = character;
+        }
+    }
+
+    public float DefaultGravityScale = 0.8f;
+
+    public bool isAttacking;
+
     public bool inAir;
 
     PlayerBaseState currentState;
@@ -33,10 +53,15 @@ public class PlayerController : MonoBehaviour
 
     [Header("Bulb Player Settings")]
     public GameObject bulbPlayer;
+    public BulbAttack bulbAttack;
+    public AudioClip bulbClick;
+    public AudioClip bulbPoofSound;
+    public AudioClip bulbClickAndPoofSound;
 
     [Header("Glide Player Settings")]
-    //public GameObject glidePlayer;
+    public GameObject glidePlayer;
     public AudioClip glideTransformSound;
+    public float glideSpeed = 2f;
 
     [Header("Goop Player Settings")]
     public GameObject goopPlayer;
@@ -66,17 +91,22 @@ public class PlayerController : MonoBehaviour
         _whiteShader = Shader.Find("Shaders/GUI Text Shader");
         _defaultShader = Shader.Find("Sprites/Default");
 
+        characterStack[0] = springState;
+        characterStack[1] = goopState;
+        characterStack[2] = bulbState;
+        characterStack[3] = glideState;
+
         RegisterPlayerStates();
 
         playerAudioSource = GetComponent<AudioSource>();
         rb = GetComponent<Rigidbody2D>();
 
-        TransitionToState(springState);
+        Camera.main.transform.SetParent(transform);
     }
 
     public void RegisterPlayerStates()
     {
-        //glideState.playerStateManager = glidePlayer.GetComponent<PlayerStateManager>();
+        glideState.playerStateManager = glidePlayer.GetComponent<PlayerStateManager>();
         goopState.playerStateManager = goopPlayer.GetComponent<PlayerStateManager>();
         springState.playerStateManager = springPlayer.GetComponent<PlayerStateManager>();
         bulbState.playerStateManager = bulbPlayer.GetComponent<PlayerStateManager>();
@@ -104,7 +134,12 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        changeCharacterFlasher.OnFlashFinished.AddListener(OnChangeCharacterFinished);
+
+        TransitionToState(springState);
+
+        //changeCharacterFlasher.OnFlashFinished.AddListener(OnChangeCharacterFinished);
+
+        currentState.Start(this);
     }
 
     private void FixedUpdate()
@@ -155,20 +190,41 @@ public class PlayerController : MonoBehaviour
 
     public void TransitionToState(PlayerBaseState state)
     {
-        animFinished = false;
-        //ShadeWhite(currentRenderer);
-
-        //changeCharacterFlasher.animator.SetTrigger(Globals.Animation.Flash);
-        if (currentState!= null)
+        if (state.playerStateManager.gameObject.activeSelf)
         {
+            rb.gravityScale = DefaultGravityScale;
+            animFinished = false;
+            //ShadeWhite(currentRenderer);
 
-            currentState.playerStateManager.gameObject.SetActive(false);
+            //changeCharacterFlasher.animator.SetTrigger(Globals.Animation.Flash);
+            if (currentState != null)
+            {
+
+                //currentState.playerStateManager.gameObject.SetActive(false);
+                //currentState.playerStateManager.transform.position = new Vector3(transform.position.x - currentState.stackIndex, transform.position.y, transform.position.z);
+                currentState.playerStateManager.DisableCharacter(currentState.playerStateManager.gameObject);
+            }
+
+            // Move the character to the top of the stack.
+            StackCharacter(state);
+
+            // Update the positions of all characters.
+            foreach (var character in characterStack)
+            {
+                character.playerStateManager.gameObject.transform.position = new Vector3(transform.position.x - character.stackIndex, transform.position.y, transform.position.z);
+            }
+
+            currentState = state;
+            currentState.EnterState(this);
+            //currentState.playerStateManager.gameObject.SetActive(true);
+            currentState.playerStateManager.EnableCharacter(currentState.playerStateManager.gameObject);
+            //ShadeNormal(currentRenderer);
         }
-        currentState = state;
-        currentState.EnterState(this);
-        currentState.playerStateManager.gameObject.SetActive(true);
+    }
 
-        //ShadeNormal(currentRenderer);
+    private void OnDestroy()
+    {
+        currentState.OnDestroy(this);
     }
 
     private IEnumerator WaitForAnim(PlayerBaseState state)
