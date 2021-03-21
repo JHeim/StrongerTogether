@@ -190,7 +190,7 @@ public class PlayerController : MonoBehaviour
 
     public void TransitionToState(PlayerBaseState state)
     {
-        if (state.playerStateManager.gameObject.activeSelf)
+        //if (state.playerStateManager.gameObject.activeSelf)
         {
             rb.gravityScale = DefaultGravityScale;
             animFinished = false;
@@ -206,19 +206,24 @@ public class PlayerController : MonoBehaviour
             }
 
             // Move the character to the top of the stack.
-            StackCharacter(state);
+            //StackCharacter(state);
 
             // Update the positions of all characters.
-            foreach (var character in characterStack)
-            {
-                character.playerStateManager.gameObject.transform.position = new Vector3(transform.position.x - character.stackIndex, transform.position.y, transform.position.z);
-            }
+            //UpdateStackPosition();
 
             currentState = state;
             currentState.EnterState(this);
             //currentState.playerStateManager.gameObject.SetActive(true);
             currentState.playerStateManager.EnableCharacter(currentState.playerStateManager.gameObject);
             //ShadeNormal(currentRenderer);
+        }
+    }
+
+    private void UpdateStackPosition()
+    {
+        foreach (var character in characterStack)
+        {
+            character.playerStateManager.gameObject.transform.position = new Vector3(transform.position.x - character.stackIndex, transform.position.y, transform.position.z);
         }
     }
 

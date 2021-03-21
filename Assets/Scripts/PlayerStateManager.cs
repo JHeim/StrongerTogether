@@ -18,39 +18,43 @@ public class PlayerStateManager : MonoBehaviour
 
     public void DisableCharacter(GameObject character)
     {
+        character.SetActive(false);
+
         // Change character position.
         //float positionOffset = Random.Range(1, 6);
         //character.transform.position = new Vector3(player.transform.position.x - stackIndex, player.transform.position.y, player.transform.position.z);
 
-        // Disable colliders.
-        foreach (var collider in myColliders)
-        {
-            collider.enabled = false;
-        }
+        //// Disable colliders.
+        //foreach (var collider in myColliders)
+        //{
+        //    collider.enabled = false;
+        //}
 
-        // Change order in layer.
-        spriteRenderer.sortingOrder = 1;
+        //// Change order in layer.
+        //spriteRenderer.sortingOrder = 1;
 
-        // Change coloring.
-        spriteRenderer.color = _inActiveColor;
+        //// Change coloring.
+        //spriteRenderer.color = _inActiveColor;
     }
 
     public void EnableCharacter(GameObject character)
     {
-        // Move character to front.
-        character.transform.position = player.transform.position;
+        character.SetActive(true);
 
-        // Enable Colliders.
-        foreach (var collider in myColliders)
-        {
-            collider.enabled = true;
-        }
+        //// Move character to front.
+        //character.transform.position = player.transform.position;
 
-        // Revert sorting.
-        spriteRenderer.sortingOrder = 2;
+        //// Enable Colliders.
+        //foreach (var collider in myColliders)
+        //{
+        //    collider.enabled = true;
+        //}
 
-        // Revert coloring.
-        spriteRenderer.color = _activeColor;
+        //// Revert sorting.
+        //spriteRenderer.sortingOrder = 2;
+
+        //// Revert coloring.
+        //spriteRenderer.color = _activeColor;
     }
 
 
