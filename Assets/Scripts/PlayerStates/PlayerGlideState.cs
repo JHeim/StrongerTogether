@@ -42,17 +42,17 @@ public class PlayerGlideState : PlayerBaseState
     {
         if (Input.GetButtonDown(Globals.Input.Glide))
         {
-            player.TransitionToState(player.springState);
+            player.TransitionToStateDelayed(player.springState);
         }
 
         if (Input.GetButtonDown(Globals.Input.Attack))
         {
-            player.TransitionToState(player.bulbState);
+            player.TransitionToStateDelayed(player.bulbState);
         }
 
         if (Input.GetButtonDown(Globals.Input.Goop))
         {
-            player.TransitionToState(player.goopState);
+            player.TransitionToStateDelayed(player.goopState);
         }
     }
 

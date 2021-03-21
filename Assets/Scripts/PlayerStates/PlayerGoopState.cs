@@ -32,26 +32,26 @@ public class PlayerGoopState : PlayerBaseState
         if (Input.GetButtonDown(Globals.Input.Goop))
         {
             //player.goopPlayer.SetActive(false);
-            player.TransitionToState(player.springState);
+            player.TransitionToStateDelayed(player.springState);
         }
 
         if (Input.GetButtonDown(Globals.Input.Jump))
         {
 
             //player.goopPlayer.SetActive(false);
-            player.TransitionToState(player.springState);
+            player.TransitionToStateDelayed(player.springState);
             player.springState.JumpCheck(player);
         }
 
         if (Input.GetButtonDown(Globals.Input.Attack))
         {
-            player.TransitionToState(player.bulbState);
+            player.TransitionToStateDelayed(player.bulbState);
         }
 
         if (Input.GetButtonDown(Globals.Input.Glide) && player.inAir)
         {
             //player.goopPlayer.SetActive(false);
-            player.TransitionToState(player.glideState);
+            player.TransitionToStateDelayed(player.glideState);
         }
     }
 

@@ -56,17 +56,17 @@ public class PlayerSpringState : PlayerBaseState
         if (Input.GetButtonDown(Globals.Input.Goop))
         {
             //player.springPlayer.SetActive(false);
-            player.TransitionToState(player.goopState);
+            player.TransitionToStateDelayed(player.goopState);
         }
 
         if (Input.GetButtonDown(Globals.Input.Attack))
         {
-            player.TransitionToState(player.bulbState);
+            player.TransitionToStateDelayed(player.bulbState);
         }
 
         if (Input.GetButtonDown(Globals.Input.Glide))
         {
-            player.TransitionToState(player.glideState);
+            player.TransitionToStateDelayed(player.glideState);
         }
 
         playerStateManager.animator.SetFloat(Globals.Animation.MoveX, player.inputMovement);

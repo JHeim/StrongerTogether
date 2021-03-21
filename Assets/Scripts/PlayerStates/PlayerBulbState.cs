@@ -67,20 +67,20 @@ public class PlayerBulbState : PlayerBaseState
             //player.rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             if (player.inputMovement > 0.1 || player.inputMovement < -0.1)
             {
-                player.TransitionToState(player.springState);
+                player.TransitionToStateDelayed(player.springState);
             }
 
             if (Input.GetButtonDown(Globals.Input.Goop))
             {
 
                 //player.rb.AddForce(new Vector2(0, 0.01f));
-                player.TransitionToState(player.goopState);
+                player.TransitionToStateDelayed(player.goopState);
             }
 
             if (Input.GetButtonDown(Globals.Input.Jump))
             {
                 //player.rb.AddForce(new Vector2(0, 0.01f));
-                player.TransitionToState(player.springState);
+                player.TransitionToStateDelayed(player.springState);
                 player.springState.JumpCheck(player);
             }
 
@@ -88,7 +88,7 @@ public class PlayerBulbState : PlayerBaseState
             {
 
                 //player.rb.AddForce(new Vector2(0, 0.01f));
-                player.TransitionToState(player.glideState);
+                player.TransitionToStateDelayed(player.glideState);
             }
 
             if (Input.GetButtonDown(Globals.Input.Attack))

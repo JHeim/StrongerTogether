@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,21 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    public PlayerBaseState[] characterStack  = new PlayerBaseState[4];
 
-    public void StackCharacter(PlayerBaseState character)
-    {
-        if (character.stackIndex > 0)
-        {
-            for (int i = character.stackIndex; i > 0; i--)
-            {
-                characterStack[i] = characterStack[i - 1];
-                characterStack[i].stackIndex = i;
-            }
-            character.stackIndex = 0;
-            characterStack[0] = character;
-        }
-    }
 
     public float DefaultGravityScale = 0.8f;
 
@@ -43,8 +30,12 @@ public class PlayerController : MonoBehaviour
 
     public PlayerExpression playerExpression;
 
+    [SerializeField]
     private Shader _whiteShader;
     private Shader _defaultShader;
+
+    [SerializeField]
+    private UnlockableTracker _unlockableTracker = new UnlockableTracker();
 
     public SpriteRenderer currentRenderer;
 
@@ -86,15 +77,12 @@ public class PlayerController : MonoBehaviour
 
     private bool animFinished;
 
+    private IEnumerator coroutine;
+
     private void Awake()
     {
-        _whiteShader = Shader.Find("Shaders/GUI Text Shader");
+        //_whiteShader = Shader.Find("Shaders/GUI Text Shader");
         _defaultShader = Shader.Find("Sprites/Default");
-
-        characterStack[0] = springState;
-        characterStack[1] = goopState;
-        characterStack[2] = bulbState;
-        characterStack[3] = glideState;
 
         RegisterPlayerStates();
 
@@ -110,7 +98,7 @@ public class PlayerController : MonoBehaviour
         goopState.playerStateManager = goopPlayer.GetComponent<PlayerStateManager>();
         springState.playerStateManager = springPlayer.GetComponent<PlayerStateManager>();
         bulbState.playerStateManager = bulbPlayer.GetComponent<PlayerStateManager>();
-        
+
     }
 
     public void ShadeWhite(SpriteRenderer renderer)
@@ -135,9 +123,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
 
-        TransitionToState(springState);
-
-        //changeCharacterFlasher.OnFlashFinished.AddListener(OnChangeCharacterFinished);
+        TransitionToStateInstantly(springState);
 
         currentState.Start(this);
     }
@@ -162,10 +148,20 @@ public class PlayerController : MonoBehaviour
         currentState.FixedUpdate(this);
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        var unlockerVolume = collision.gameObject.GetComponent<UnlockerScript>();
+
+        if (unlockerVolume != null)
+        {
+            Debug.Log("Entered Unlocker Volume of " + unlockerVolume.name);
+            Type unlockedStateType = unlockerVolume.GetUnlockable();
+            _unlockableTracker.UnlockCharacter(unlockedStateType);
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        
-
         currentState.OnCollisionEnter2D(this, collision);
     }
 
@@ -188,42 +184,79 @@ public class PlayerController : MonoBehaviour
         animFinished = true;
     }
 
-    public void TransitionToState(PlayerBaseState state)
+    public void TransitionToStateDelayed(PlayerBaseState state)
     {
-        //if (state.playerStateManager.gameObject.activeSelf)
+        if (CheckIfCanTransitionToState(state))
         {
             rb.gravityScale = DefaultGravityScale;
             animFinished = false;
-            //ShadeWhite(currentRenderer);
-
-            //changeCharacterFlasher.animator.SetTrigger(Globals.Animation.Flash);
-            if (currentState != null)
-            {
-
-                //currentState.playerStateManager.gameObject.SetActive(false);
-                //currentState.playerStateManager.transform.position = new Vector3(transform.position.x - currentState.stackIndex, transform.position.y, transform.position.z);
-                currentState.playerStateManager.DisableCharacter(currentState.playerStateManager.gameObject);
-            }
-
-            // Move the character to the top of the stack.
-            //StackCharacter(state);
-
-            // Update the positions of all characters.
-            //UpdateStackPosition();
-
-            currentState = state;
-            currentState.EnterState(this);
-            //currentState.playerStateManager.gameObject.SetActive(true);
-            currentState.playerStateManager.EnableCharacter(currentState.playerStateManager.gameObject);
-            //ShadeNormal(currentRenderer);
+            DisableOldState(state);
         }
     }
 
-    private void UpdateStackPosition()
+    public bool CheckIfCanTransitionToState(PlayerBaseState state)
     {
-        foreach (var character in characterStack)
+        bool result = false;
+
+        if (_unlockableTracker.IsCharacterUnlocked(state.GetType()))
         {
-            character.playerStateManager.gameObject.transform.position = new Vector3(transform.position.x - character.stackIndex, transform.position.y, transform.position.z);
+            result = true;
+        }
+
+        return result;
+    }
+
+    public void TransitionToStateInstantly(PlayerBaseState state)
+    {
+        rb.gravityScale = DefaultGravityScale;
+        animFinished = false;
+        if (currentState != null)
+        {
+            currentState.playerStateManager.DisableCharacter(currentState.playerStateManager.gameObject);
+        }
+
+        currentState = state;
+        currentState.EnterState(this);
+
+        currentState.playerStateManager.EnableCharacter(currentState.playerStateManager.gameObject);
+    }
+
+    private IEnumerator WaitAndRevert()
+    {
+        yield return new WaitForSeconds(.2f);
+        ShadeNormal(currentState.playerStateManager.spriteRenderer);
+        playerExpression.gameObject.SetActive(true);
+    }
+
+    private IEnumerator WaitAndDisable(PlayerBaseState newState)
+    {
+        yield return new WaitForSeconds(.1f);
+        currentState.playerStateManager.DisableCharacter(currentState.playerStateManager.gameObject);
+        EnableNewState(newState);
+
+    }
+
+    private void EnableNewState(PlayerBaseState state)
+    {
+        currentState = state;
+        currentState.EnterState(this);
+        //currentState.playerStateManager.gameObject.SetActive(true);
+        currentState.playerStateManager.EnableCharacter(currentState.playerStateManager.gameObject);
+        ShadeWhite(currentState.playerStateManager.spriteRenderer);
+
+        coroutine = WaitAndRevert();
+        StartCoroutine(coroutine);
+    }
+
+    private void DisableOldState(PlayerBaseState newState)
+    {
+        if (currentState != null)
+        {
+
+            playerExpression.gameObject.SetActive(false);
+            ShadeWhite(currentState.playerStateManager.spriteRenderer);
+            coroutine = WaitAndDisable(newState);
+            StartCoroutine(coroutine);
         }
     }
 
@@ -232,8 +265,4 @@ public class PlayerController : MonoBehaviour
         currentState.OnDestroy(this);
     }
 
-    private IEnumerator WaitForAnim(PlayerBaseState state)
-    {
-        yield return animFinished;
-    }
 }
