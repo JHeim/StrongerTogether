@@ -68,6 +68,10 @@ public class PlayerController : MonoBehaviour
     public AudioClip springTransformSound;
     public AudioClip jumpSound;
 
+    [Space]
+    [SerializeField]
+    private AudioClip _unlockSound;
+
     public readonly PlayerBulbState bulbState = new PlayerBulbState();
     public readonly PlayerGlideState glideState = new PlayerGlideState();
     public readonly PlayerGoopState goopState = new PlayerGoopState();
@@ -150,13 +154,14 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        var unlockerVolume = collision.gameObject.GetComponent<UnlockerScript>();
+        var unlockable = collision.gameObject.GetComponent<UnlockablePickup>();
 
-        if (unlockerVolume != null)
+        if (unlockable != null)
         {
-            Debug.Log("Entered Unlocker Volume of " + unlockerVolume.name);
-            Type unlockedStateType = unlockerVolume.GetUnlockable();
+            Type unlockedStateType = unlockable.PickupUnlockable();
+            unlockable.gameObject.SetActive(false);
             _unlockableTracker.UnlockCharacter(unlockedStateType);
+            PlaySound(_unlockSound);
         }
     }
 
